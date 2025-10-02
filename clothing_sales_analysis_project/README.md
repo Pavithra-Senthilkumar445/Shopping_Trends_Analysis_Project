@@ -109,8 +109,7 @@ This analysis provides actionable insights for:
 
 ---
 
-**Portfolio Project by [Your Name]**  
-*Demonstrating end-to-end data analysis capabilities*
+
 
 
 

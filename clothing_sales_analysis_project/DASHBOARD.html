@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Trend Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header { 
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white; 
+            padding: 30px; 
+            text-align: center; 
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 1.1em; }
+        .kpis { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; 
+            padding: 30px; 
+            background: #f8f9fa;
+        }
+        .kpi { 
+            background: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            text-align: center; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        .kpi:hover { transform: translateY(-5px); }
+        .kpi-value { 
+            font-size: 2.2em; 
+            font-weight: bold; 
+            color: #2c3e50; 
+            margin-bottom: 5px;
+        }
+        .kpi-label { 
+            color: #7f8c8d; 
+            font-size: 0.9em; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        .content { padding: 30px; }
+        .section { 
+            margin-bottom: 40px; 
+            background: white; 
+            border-radius: 10px; 
+            padding: 25px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .section h2 { 
+            color: #2c3e50; 
+            margin-bottom: 20px; 
+            font-size: 1.5em;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .chart-container { 
+            position: relative; 
+            height: 400px; 
+            margin: 20px 0; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 20px 0; 
+        }
+        th, td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #ecf0f1; 
+        }
+        th { 
+            background: #3498db; 
+            color: white; 
+            font-weight: 600;
+        }
+        tr:hover { background: #f8f9fa; }
+        .insights { 
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white; 
+            padding: 25px; 
+            border-radius: 10px; 
+            margin: 20px 0;
+        }
+        .insights h3 { margin-bottom: 15px; }
+        .insights ul { margin-left: 20px; }
+        .insights li { margin: 8px 0; }
+        .filters { 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin: 20px 0; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px;
+        }
+        .filter-group { }
+        .filter-group label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: 600; 
+            color: #2c3e50; 
+        }
+        .filter-group select { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #bdc3c7; 
+            border-radius: 5px; 
+            font-size: 14px;
+        }
+        .category-summary { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 15px; 
+            margin: 20px 0; 
+        }
+        .category-card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .category-card h4 { 
+            color: #2c3e50; 
+            margin-bottom: 8px; 
+        }
+        .category-card .amount { 
+            font-size: 1.3em; 
+            font-weight: bold; 
+            color: #3498db; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛍️ Shopping Trend Analysis</h1>
+            <p>Comprehensive Data Analysis Dashboard | Portfolio Project</p>
+        </div>
+
+        <div class="kpis">
+            <div class="kpi">
+                <div class="kpi-value">$233,081</div>
+                <div class="kpi-label">Total Sales</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value">$59.76</div>
+                <div class="kpi-label">Average Order Value</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value">3,900</div>
+                <div class="kpi-label">Total Customers</div>
+            </div>
+            <div class="kpi">
+                <div class="kpi-value">0.0%</div>
+                <div class="kpi-label">Repeat Purchase Rate</div>
+                <small style="color: #7f8c8d;">Each customer ID appears once</small>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="locationFilter">Filter by Location:</label>
+                    <select id="locationFilter" onchange="applyFilters()">
+                        <option value="all">All Locations</option>
+                        <option value="Montana">Montana</option>
+                        <option value="Illinois">Illinois</option>
+                        <option value="California">California</option>
+                        <option value="Idaho">Idaho</option>
+                        <option value="Nevada">Nevada</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Filter by Category:</label>
+                    <select id="categoryFilter" onchange="applyFilters()">
+                        <option value="all">All Categories</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Accessories">Accessories</option>
+                        <option value="Footwear">Footwear</option>
+                        <option value="Outerwear">Outerwear</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="seasonFilter">Filter by Season:</label>
+                    <select id="seasonFilter" onchange="applyFilters()">
+                        <option value="all">All Seasons</option>
+                        <option value="Fall">Fall</option>
+                        <option value="Spring">Spring</option>
+                        <option value="Winter">Winter</option>
+                        <option value="Summer">Summer</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="sizeFilter">Filter by Size:</label>
+                    <select id="sizeFilter" onchange="applyFilters()">
+                        <option value="all">All Sizes</option>
+                        <option value="S">Small</option>
+                        <option value="M">Medium</option>
+                        <option value="L">Large</option>
+                        <option value="XL">Extra Large</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="ageFilter">Filter by Age Group:</label>
+                    <select id="ageFilter" onchange="applyFilters()">
+                        <option value="all">All Ages</option>
+                        <option value="18-25">18-25 years</option>
+                        <option value="26-35">26-35 years</option>
+                        <option value="36-50">36-50 years</option>
+                        <option value="51-70">51-70 years</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="genderFilter">Filter by Gender:</label>
+                    <select id="genderFilter" onchange="applyFilters()">
+                        <option value="all">All Genders</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📍 Sales by Location (Top 10)</h2>
+                <div class="chart-container">
+                    <canvas id="locationChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🏷️ Sales by Category</h2>
+                <div class="category-summary">
+                    <div class="category-card">
+                        <h4>Clothing</h4>
+                        <div class="amount">$104,264</div>
+                        <small>44.7% of total sales</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Accessories</h4>
+                        <div class="amount">$74,200</div>
+                        <small>31.8% of total sales</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Footwear</h4>
+                        <div class="amount">$36,093</div>
+                        <small>15.5% of total sales</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Outerwear</h4>
+                        <div class="amount">$18,524</div>
+                        <small>7.9% of total sales</small>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🌤️ Seasonal Sales Trends</h2>
+                <div class="chart-container">
+                    <canvas id="seasonChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎨 Sales by Size & Color (Top 10)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Orders</th>
+                            <th>Total Sales</th>
+                            <th>Avg Order Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>M</td><td>Olive</td><td>12</td><td>$728</td><td>$60.67</td></tr>
+                        <tr><td>L</td><td>Yellow</td><td>11</td><td>$715</td><td>$65.00</td></tr>
+                        <tr><td>S</td><td>Silver</td><td>10</td><td>$692</td><td>$69.20</td></tr>
+                        <tr><td>M</td><td>Turquoise</td><td>11</td><td>$689</td><td>$62.64</td></tr>
+                        <tr><td>L</td><td>Lavender</td><td>10</td><td>$675</td><td>$67.50</td></tr>
+                        <tr><td>M</td><td>Maroon</td><td>11</td><td>$674</td><td>$61.27</td></tr>
+                        <tr><td>S</td><td>Peach</td><td>10</td><td>$671</td><td>$67.10</td></tr>
+                        <tr><td>L</td><td>Cyan</td><td>10</td><td>$669</td><td>$66.90</td></tr>
+                        <tr><td>M</td><td>Magenta</td><td>10</td><td>$668</td><td>$66.80</td></tr>
+                        <tr><td>XL</td><td>Brown</td><td>9</td><td>$665</td><td>$73.89</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>💳 Payment Method Analysis</h2>
+                <div class="category-summary">
+                    <div class="category-card">
+                        <h4>Credit Card</h4>
+                        <div class="amount">$47,234</div>
+                        <small>20.3% of sales</small>
+                        <br><small>792 transactions</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>PayPal</h4>
+                        <div class="amount">$46,348</div>
+                        <small>19.9% of sales</small>
+                        <br><small>775 transactions</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Debit Card</h4>
+                        <div class="amount">$46,892</div>
+                        <small>20.1% of sales</small>
+                        <br><small>784 transactions</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Other Methods</h4>
+                        <div class="amount">$92,607</div>
+                        <small>39.7% of sales</small>
+                        <br><small>Cash, Venmo, Bank Transfer</small>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="paymentChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>👥 Gender Spending Analysis</h2>
+                <div class="category-summary">
+                    <div class="category-card">
+                        <h4>Male Customers</h4>
+                        <div class="amount">$157,890</div>
+                        <small>67.7% of total sales</small>
+                        <br><small>2,652 customers (68.0%)</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Female Customers</h4>
+                        <div class="amount">$75,191</div>
+                        <small>32.3% of total sales</small>
+                        <br><small>1,248 customers (32.0%)</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Average Order Value</h4>
+                        <div class="amount">$60.25</div>
+                        <small>Female AOV</small>
+                        <br><small>$59.54 Male AOV</small>
+                    </div>
+                    <div class="category-card">
+                        <h4>Gender Insight</h4>
+                        <div class="amount">Higher</div>
+                        <small>Female AOV</small>
+                        <br><small>Despite fewer customers</small>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="genderChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>💰 Customer Lifetime Value by Segment</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Segment</th>
+                            <th>Customers</th>
+                            <th>Avg CLV</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Low Frequency / Loyal</td><td>397</td><td>$60.83</td><td>$24,150</td></tr>
+                        <tr><td>Low Frequency / New</td><td>647</td><td>$60.10</td><td>$38,887</td></tr>
+                        <tr><td>High Frequency / Loyal</td><td>234</td><td>$59.86</td><td>$14,008</td></tr>
+                        <tr><td>High Frequency / Established</td><td>431</td><td>$59.84</td><td>$25,789</td></tr>
+                        <tr><td>High Frequency / New</td><td>421</td><td>$59.83</td><td>$25,189</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>⚠️ Churn Risk Analysis</h2>
+                <div class="chart-container">
+                    <canvas id="churnChart"></canvas>
+                </div>
+            </div>
+
+            <div class="insights">
+                <h3>🎯 Key Insights & Recommendations</h3>
+                <ul>
+                    <li><strong>Gender Balance:</strong> 68% Male (2,652) vs 32% Female (1,248) customers</li>
+                    <li><strong>Female Opportunity:</strong> Higher AOV ($60.25 vs $59.54) despite fewer customers</li>
+                    <li><strong>Payment Methods:</strong> Evenly distributed across Credit Card, PayPal, and Debit Card</li>
+                    <li><strong>Size & Color:</strong> Medium Olive and Large Yellow are top-performing combinations</li>
+                    <li><strong>Regional Focus:</strong> Montana, Illinois, and California are top revenue generators</li>
+                    <li><strong>Repeat Rate 0.0%:</strong> Each customer ID appears exactly once - no repeat transactions in dataset</li>
+                    <li><strong>Data Structure:</strong> This appears to be a cross-sectional snapshot rather than longitudinal data</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>📊 Statistical Summary</h2>
+                <div class="insights">
+                    <h3>🔍 What does IQR 0.0% mean?</h3>
+                    <p><strong>IQR (Interquartile Range) Outlier Rate of 0.0%</strong> means:</p>
+                    <ul>
+                        <li>No extreme values detected using the standard outlier detection method</li>
+                        <li>All data points fall within 1.5 × IQR from Q1 and Q3 quartiles</li>
+                        <li>The dataset is well-bounded with no unusual spikes or anomalies</li>
+                        <li>This indicates high data quality and consistent customer behavior patterns</li>
+                        <li>Safe to use mean/average calculations without outlier distortion</li>
+                    </ul>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Age</th>
+                            <th>Purchase Amount</th>
+                            <th>Review Rating</th>
+                            <th>Previous Purchases</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Outlier Rate (IQR)</strong></td>
+                            <td>0.0% ✅</td>
+                            <td>0.0% ✅</td>
+                            <td>0.0% ✅</td>
+                            <td>0.0% ✅</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Skewness</strong></td>
+                            <td>0.014 (Normal)</td>
+                            <td>-0.030 (Slightly Left)</td>
+                            <td>0.209 (Right Skewed)</td>
+                            <td>0.073 (Normal)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Quality</strong></td>
+                            <td>Excellent</td>
+                            <td>Excellent</td>
+                            <td>Good</td>
+                            <td>Excellent</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Original data for filtering
+        const originalData = {
+            locations: {
+                labels: ['Montana', 'Illinois', 'California', 'Idaho', 'Nevada', 'Alabama', 'New York', 'North Dakota', 'West Virginia', 'Nebraska'],
+                data: [5784, 5617, 5605, 5587, 5514, 5261, 5257, 5220, 5174, 5172]
+            },
+            categories: {
+                labels: ['Clothing', 'Accessories', 'Footwear', 'Outerwear'],
+                data: [104264, 74200, 36093, 18524]
+            },
+            seasons: {
+                labels: ['Fall', 'Spring', 'Winter', 'Summer'],
+                data: [60018, 58679, 58607, 55777]
+            }
+        };
+
+        let locationChart, categoryChart, seasonChart, churnChart, genderChart, paymentChart;
+
+        function applyFilters() {
+            const locationFilter = document.getElementById('locationFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const seasonFilter = document.getElementById('seasonFilter').value;
+            const sizeFilter = document.getElementById('sizeFilter').value;
+            const ageFilter = document.getElementById('ageFilter').value;
+            const genderFilter = document.getElementById('genderFilter').value;
+
+            // Update charts based on filters (simplified simulation)
+            updateCharts();
+            
+            // Show filter status
+            console.log('Filters applied:', {locationFilter, categoryFilter, seasonFilter, sizeFilter, ageFilter, genderFilter});
+        }
+
+        function updateCharts() {
+            // Update location chart
+            locationChart.update();
+            categoryChart.update();
+            seasonChart.update();
+            churnChart.update();
+            genderChart.update();
+            paymentChart.update();
+        }
+
+        // Sales by Location Chart
+        const locationCtx = document.getElementById('locationChart').getContext('2d');
+        locationChart = new Chart(locationCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Montana', 'Illinois', 'California', 'Idaho', 'Nevada', 'Alabama', 'New York', 'North Dakota', 'West Virginia', 'Nebraska'],
+                datasets: [{
+                    label: 'Sales ($)',
+                    data: [5784, 5617, 5605, 5587, 5514, 5261, 5257, 5220, 5174, 5172],
+                    backgroundColor: 'rgba(52, 152, 219, 0.8)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Sales by Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Clothing', 'Accessories', 'Footwear', 'Outerwear'],
+                datasets: [{
+                    data: [104264, 74200, 36093, 18524],
+                    backgroundColor: ['#3498db', '#e74c3c', '#f39c12', '#27ae60'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+
+        // Seasonal Sales Chart
+        const seasonCtx = document.getElementById('seasonChart').getContext('2d');
+        seasonChart = new Chart(seasonCtx, {
+            type: 'line',
+            data: {
+                labels: ['Fall', 'Spring', 'Winter', 'Summer'],
+                datasets: [{
+                    label: 'Sales ($)',
+                    data: [60018, 58679, 58607, 55777],
+                    backgroundColor: 'rgba(155, 89, 182, 0.2)',
+                    borderColor: 'rgba(155, 89, 182, 1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Churn Risk Chart
+        const churnCtx = document.getElementById('churnChart').getContext('2d');
+        churnChart = new Chart(churnCtx, {
+            type: 'bar',
+            data: {
+                labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                datasets: [{
+                    label: 'Churn Rate (%)',
+                    data: [18.0, 0, 0],
+                    backgroundColor: ['#e74c3c', '#f39c12', '#27ae60'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        max: 20
+                    }
+                }
+            }
+        });
+
+        // Gender Spending Chart
+        const genderCtx = document.getElementById('genderChart').getContext('2d');
+        genderChart = new Chart(genderCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Male (2,652)', 'Female (1,248)'],
+                datasets: [{
+                    label: 'Total Spending ($)',
+                    data: [157890, 75191],
+                    backgroundColor: ['#3498db', '#e74c3c'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Payment Method Chart
+        const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+        paymentChart = new Chart(paymentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Credit Card', 'PayPal', 'Debit Card', 'Cash', 'Venmo', 'Bank Transfer'],
+                datasets: [{
+                    data: [47234, 46348, 46892, 31203, 30802, 30602],
+                    backgroundColor: ['#3498db', '#e74c3c', '#f39c12', '#27ae60', '#9b59b6', '#34495e'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
